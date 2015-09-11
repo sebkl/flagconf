@@ -1,5 +1,3 @@
-package flagconf
-
 // Package flagconf wraps the standard golang package flag. It intercepts it and preloads configuration values from
 // local files (home-directory, /etc) and environment variables in order to retrieve default values. The resulting
 // order of flag loading is:
@@ -10,6 +8,7 @@ package flagconf
 //  4) command line arguments
 //
 // TODO: implement option that dumps loaded options and asks the user whether to really use them.
+package flagconf
 
 import (
 	"encoding/json"

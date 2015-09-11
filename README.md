@@ -27,7 +27,7 @@ func main() {
 	// all environemnt variables starting with "MYAPP"
 	// are being evaluated for a flag value named "val"
 	// If found the default value "defaultvalue" is overwritten.
-	flag.Parse("MYAPP")
+	flagconf.Parse("MYAPP")
 
 	/* ... code ... */
 }
