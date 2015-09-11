@@ -1,5 +1,5 @@
 # flagconf
-Package flagconf wraps the standard golang package [flag](https://golang.org/pkg/flag/)flag. It intercepts it and preloads configuration values from
+Package flagconf wraps the standard golang package [flag](https://golang.org/pkg/flag/). It intercepts it and preloads configuration values from
 local files (home-directory, /etc) and environment variables in order to retrieve default values. The resulting
  order of flag loading is:
 
@@ -23,8 +23,12 @@ func init() {
 }
 
 func main() {
-	//The file "~/.flagconf/MYAPP.yml" is evaluated for the flag named val and if existing will overwrite the "defaultvalue"
+	// The file "~/.flagconf/MYAPP.yml" and
+	// all environemnt variables starting with "MYAPP"
+	// are being evaluated for a flag value named "val"
+	// If found the default value "defaultvalue" is overwritten.
 	flag.Parse("MYAPP")
+
 	/* ... code ... */
 }
 ```
@@ -36,7 +40,7 @@ func main() {
 
 
 ## Documentation
-Please find documentation at [godoc.org/sebkl/flagconf](http://godoc.org/github.com/sebkl/flagconf).
+Please find documentation at [godoc.org/github.com/sebkl/flagconf](http://godoc.org/github.com/sebkl/flagconf).
 
 ## Contribution
 Pleas feel free to send in Pull request. I want to make this a more comprehensive library for dealing with command line flags.
