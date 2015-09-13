@@ -2,8 +2,8 @@
 // local files (home-directory, /etc) and environment variables in order to retrieve default values. The resulting
 // order of flag loading is:
 //
-//  1) in-code values (defaults provided in flagset, whcih is usually defined in the init function)
-//  2) local file list (default is just ~/.falgconf/<PREFIX>.yaml
+//  1) in-code values (defaults provided in the flagset)
+//  2) local file list (default is just [ "~/.flagconf/<PREFIX>.yaml" ]
 //  3) environment variables
 //  4) command line arguments
 //
