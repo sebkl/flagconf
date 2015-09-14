@@ -13,11 +13,13 @@ package flagconf
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	yaml "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 )
 
@@ -30,6 +32,7 @@ func setFromFileByPrefix(prefix, fn string, ret map[string]string) {
 
 	file, err := os.Open(fn)
 	if err != nil {
+		log.Printf("Could not open flagconf file '%s': %s", fn, err)
 		return
 	}
 
@@ -69,7 +72,30 @@ func setFromEnvByPrefix(prefix string, ret map[string]string) {
 	}
 }
 
+func confirmFlagConfiguration(fss ...*flag.FlagSet) bool {
+	for _, fs := range fss {
+		fs.VisitAll(func(f *flag.Flag) {
+			fmt.Fprintf(os.Stderr, "\t%s = %s\n", f.Name, f.Value.String())
+		})
+	}
+	fmt.Fprintf(os.Stderr, "\nProceed with the above flag configuration ? (yes/[no]) ")
+	var resp string
+	_, err := fmt.Scanln(&resp)
+	if err != nil {
+		return false
+	}
+
+	if ok, err := regexp.MatchString("^[yY]([eE][sS])?$", resp); ok && err == nil {
+		return true
+	}
+	return false
+}
+
 var filelist []string
+var internalConfig struct {
+	ConfigFile          string
+	RequireConfirmation bool
+}
 
 //FileList sets or gets the list of used files in actual order.
 func FileList(fl ...[]string) []string {
@@ -79,6 +105,16 @@ func FileList(fl ...[]string) []string {
 	return filelist
 }
 
+func setupInternalFlags(fs *flag.FlagSet) {
+	if fs.Lookup("flagconfFile") == nil {
+		fs.StringVar(&internalConfig.ConfigFile, "flagconfFile", "", "Specify flagconf configuration")
+	}
+
+	if fs.Lookup("flagconfConfirm") == nil {
+		fs.BoolVar(&internalConfig.RequireConfirmation, "flagconfConfirm", false, "Require confirmation from user ro use flag configuration")
+	}
+}
+
 //Parse is a replacement for the flag.Parse function that intercepts it and reads the configuration
 // from a defined set of files and environment variables.
 func Parse(prefix string, ofs ...*flag.FlagSet) {
@@ -86,10 +122,14 @@ func Parse(prefix string, ofs ...*flag.FlagSet) {
 		ofs = []*flag.FlagSet{flag.CommandLine}
 	}
 
+	if filelist == nil { // if not filelist is set by user, use a default one
+		home := os.Getenv("HOME")
+		filelist = []string{home + "/.flagconf/" + prefix + ".yml"}
+	}
+
+	setupInternalFlags(ofs[0])
+
 	for _, fs := range ofs {
-		if filelist == nil { // if not filelist is set by user, use a default one
-			filelist = []string{"~/.flagconf/" + prefix + ".yml"}
-		}
 
 		settings := make(map[string]string)
 
@@ -111,4 +151,10 @@ func Parse(prefix string, ofs ...*flag.FlagSet) {
 	}
 
 	flag.Parse()
+
+	if internalConfig.RequireConfirmation {
+		if !confirmFlagConfiguration(ofs...) {
+			log.Fatal("Aborted. Flag configuration not accepted by user.")
+		}
+	}
 }

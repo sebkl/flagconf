@@ -38,6 +38,11 @@ func main() {
 - Json encoded configuration files instead of yaml.
 - Provide an ordered list of files to look for flag values by the [FileList](http://godoc.org/github.com/sebkl/flagconf#FileList) function.
 
+### Additional flags added by flagconf
+| flag | Description |
+| --- | --- |
+| ```flagconfConfirm``` | Show all flag configs before execution. |
+| ```flagconfFile```| Explicitly define a file to read flag configs from. |
 
 ## Documentation
 Please find documentation at [godoc.org/github.com/sebkl/flagconf](http://godoc.org/github.com/sebkl/flagconf).
