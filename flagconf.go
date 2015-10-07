@@ -35,6 +35,7 @@ func setFromFileByPrefix(prefix, fn string, ret map[string]string) {
 		log.Printf("Could not open flagconf file '%s': %s", fn, err)
 		return
 	}
+	log.Printf("Loading config file: %s", fn)
 
 	by, err := ioutil.ReadAll(file)
 	if err != nil {
@@ -123,11 +124,24 @@ func Parse(prefix string, ofs ...*flag.FlagSet) {
 	}
 
 	if filelist == nil { // if not filelist is set by user, use a default one
+		filelist = make([]string, 0)
 		home := os.Getenv("HOME")
-		filelist = []string{home + "/.flagconf/" + prefix + ".yml"}
+		filelist = append(filelist, home+"/.flagconf/"+prefix+".yml")
 	}
 
 	setupInternalFlags(ofs[0])
+
+	flag.Parse()
+
+	if internalConfig.RequireConfirmation {
+		if !confirmFlagConfiguration(ofs...) {
+			log.Fatal("Aborted. Flag configuration not accepted by user.")
+		}
+	}
+
+	if len(internalConfig.ConfigFile) > 0 {
+		filelist = append(filelist, internalConfig.ConfigFile)
+	}
 
 	for _, fs := range ofs {
 
@@ -150,11 +164,4 @@ func Parse(prefix string, ofs ...*flag.FlagSet) {
 		})
 	}
 
-	flag.Parse()
-
-	if internalConfig.RequireConfirmation {
-		if !confirmFlagConfiguration(ofs...) {
-			log.Fatal("Aborted. Flag configuration not accepted by user.")
-		}
-	}
 }
