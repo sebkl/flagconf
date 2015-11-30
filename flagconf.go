@@ -107,7 +107,11 @@ func FileList(fl ...[]string) []string {
 }
 
 func setupInternalFlags(fs *flag.FlagSet) {
-	if fs.Lookup("flagconfFile") == nil {
+	if fs.Lookup("c") == nil {
+		fs.StringVar(&internalConfig.ConfigFile, "c", "", "Specify flagconf configuration")
+	} else if fs.Lookup("C") == nil {
+		fs.StringVar(&internalConfig.ConfigFile, "C", "", "Specify flagconf configuration")
+	} else if fs.Lookup("flagconfFile") == nil {
 		fs.StringVar(&internalConfig.ConfigFile, "flagconfFile", "", "Specify flagconf configuration")
 	}
 
@@ -133,18 +137,12 @@ func Parse(prefix string, ofs ...*flag.FlagSet) {
 
 	flag.Parse()
 
-	if internalConfig.RequireConfirmation {
-		if !confirmFlagConfiguration(ofs...) {
-			log.Fatal("Aborted. Flag configuration not accepted by user.")
-		}
-	}
-
 	if len(internalConfig.ConfigFile) > 0 {
 		filelist = append(filelist, internalConfig.ConfigFile)
+		internalConfig.ConfigFile = ""
 	}
 
 	for _, fs := range ofs {
-
 		settings := make(map[string]string)
 
 		//walk through levels
@@ -164,4 +162,9 @@ func Parse(prefix string, ofs ...*flag.FlagSet) {
 		})
 	}
 
+	if internalConfig.RequireConfirmation {
+		if !confirmFlagConfiguration(ofs...) {
+			log.Fatal("Aborted. Flag configuration not accepted by user.")
+		}
+	}
 }
