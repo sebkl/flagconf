@@ -1,7 +1,7 @@
 package flagconf_test
 
 import (
-	flagconf "."
+	"github.com/sebkl/flagconf"
 	"flag"
 	"fmt"
 	"io/ioutil"
